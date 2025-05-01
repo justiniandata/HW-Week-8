@@ -132,3 +132,65 @@ plt.title('ROC Curve Comparison')
 plt.legend(loc='lower right')
 plt.grid(True)
 plt.show()
+
+import pandas as pd
+import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+
+# Create a synthetic food nutrients dataset
+np.random.seed(42)
+n_samples = 150
+food_data = {
+    'calories': np.random.normal(500, 150, n_samples),
+    'protein': np.random.normal(20, 5, n_samples),
+    'fat': np.random.normal(30, 10, n_samples),
+    'carbs': np.random.normal(50, 15, n_samples),
+    'fiber': np.random.normal(5, 2, n_samples)
+}
+food_df = pd.DataFrame(food_data)
+
+X_food = food_df.copy() # Features for clustering
+
+inertia_scores = []
+silhouette_scores_list = []
+k_values = range(2, 11)  # Let's try k from 2 to 10
+
+for k in k_values:
+    # Initialize and fit the KMeans model
+    kmeans = KMeans(n_clusters=k, n_init='auto', random_state=42)
+    kmeans.fit(X_food)
+
+    # Calculate inertia
+    inertia = kmeans.inertia_
+    inertia_scores.append(inertia)
+
+    # Calculate silhouette score
+    silhouette = silhouette_score(X_food, kmeans.labels_)
+    silhouette_scores_list.append(silhouette)
+
+# Plotting the results
+plt.figure(figsize=(12, 5))
+
+plt.subplot(1, 2, 1)
+plt.plot(k_values, inertia_scores, marker='o')
+plt.title('Inertia vs. Number of Clusters (k)')
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('Inertia')
+plt.grid(True)
+
+plt.subplot(1, 2, 2)
+plt.plot(k_values, silhouette_scores_list, marker='o')
+plt.title('Silhouette Score vs. Number of Clusters (k)')
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('Silhouette Score')
+plt.grid(True)
+
+plt.tight_layout()
+plt.show()
+
+print("Inertia Scores:", dict(zip(k_values, inertia_scores)))
+print("Silhouette Scores:", dict(zip(k_values, silhouette_scores_list)))
+
